@@ -1,0 +1,55 @@
+[user]
+	email = mioengel@gmail.com
+	name = Mio Engel
+[push]
+	default = simple
+[credential]
+	helper = chache --timeout=3600
+[alias]
+	branch-name = "!git rev-parse --abbrev-ref HEAD"
+	publish = "!git push -u origin $(git branch-name)"
+	unpublish = "!git push origin :$(git branch-name)"
+	
+	code-review = difftool origin/master...
+
+	merge-span = "!f() { echo $(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 $2 --merges --pretty=format:%P | cut -d' ' -f2); }; f"
+
+	merge-log = "!git log `git merge-span .. $1`"
+	merge-diff = "!git diff `git merge-span ... $1`"
+	merge-difftool = "!git difftool `git merge-span ... $1`"
+
+	rebase-branch = "!git rebase -i `git merge-base master HEAD`"
+
+	unstage = reset HEAD
+	diffc = diff --cached
+
+	assume = update-index --assume-unchanged
+	unassume = update-index --no-assume-unchanged
+	assumed = "!git ls-files -v | grep ^h | cut -c 3-"
+
+	ours = "!f() { git checkout --ours $@ && git add $@; }; f"
+	theirs = "!f() { git checkout --theirs $@ && git add $@; }; f"
+
+	delete-merged-branches = "!git checkout master && git branch --merged | grep -v '\\*' | xargs -n 1 git branch -d"
+[core]
+	autocrlf = input
+[merge]
+	keepBackup = false
+	tool = p4merge
+[mergetool]
+	propmt = false
+[mergetool "p4merge"]
+	cmd = p4merge "$BASE" "$LOCAL" "$REMOTE" "$MERGED"
+	keepTemporaries = false
+	trustExitCode = false
+	keepBackup = false
+[diff]
+	tool = p4merge
+[difftool]
+	prompt = false
+[difftool "p4merge"]
+	cmd = p4merge "$LOCAL" "$REMOTE"
+	keepTemporaries = false
+	trustExitCode = false
+	keepBackup = false
+
