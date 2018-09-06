@@ -6,6 +6,41 @@ fi
 
 source "$HOME/lib/colors.sh"
 
+olderThanMinutes() {
+    local MATCHES
+    local FIND_EXIT_CODE
+
+    if [[ -z "$FIND_COMAND" ]]; then
+        if command -v gfin > /dev/null; then
+            FIND_COMMAND=gfind
+        else
+            FIND_COMMAND=find
+        fi
+    fi
+
+    MATCHES=$("$FIND_COMMAND" "$1" -mmin +"$2" 2> /dev/null)
+    FIND_EXIT_CODE=$?
+    if [[ -n "$MATCHES" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+checkUpstream() {
+    local REPO=$(git rev-parse --show-toplevel 2> /dev/null)
+    local GIT_PROMPT_FETCH_TIMEOUT="5"
+    local FETCH_HEAD="$REPO/.git/FETCH_HEAD"
+    # Fetch repo if local is stale for more than $GIT_FETCH_TIMEOUT minutes
+    if [[ ! -e "$FETCH_HEAD" ]] || olderThanMinutes "$FETCH_HEAD" "$GIT_PROMPT_FETCH_TIMEOUT"
+    then
+        if [[ -n $(git remote show) ]]; then
+            # Runs git fetch quietly in the background
+            (git fetch --quiet &> /dev/null & disown -h)
+        fi
+    fi
+}
+
 replaceSymbols() {
     set -f
 
@@ -17,6 +52,8 @@ replaceSymbols() {
 
     set +f
 }
+
+checkUpstream
 
 declare -a git_status_fields=($($HOME/lib/gitstatus 2>/dev/null))
 
