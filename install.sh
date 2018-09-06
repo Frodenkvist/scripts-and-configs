@@ -45,6 +45,11 @@ if [ ! -d "$HOME/lib" ]; then
     mkdir "$HOME/lib"
 fi
 
+# install colors.sh
+echo "Installing colors.sh..."
+[ -f "$HOME/lib/colors.sh" ] && rm -rf "$HOME/lib/colors.sh"
+ln -s "$SCRIPT_PATH/lib/colors.sh" "$HOME/lib/colors.sh"
+
 # install gitstatus
 echo "Installing gitstatus..."
 [ -f "$HOME/lib/gitstatus" ] && rm -rf "$HOME/lib/gitstatus"
@@ -54,4 +59,16 @@ ln -s "$SCRIPT_PATH/lib/gitstatus" "$HOME/lib/gitstatus"
 echo "Installing git-parser..."
 [ -f "$HOME/bin/git-parser" ] && rm -rf "$HOME/bin/git-parser"
 ln -s "$SCRIPT_PATH/bin/git-parser" "$HOME/bin/git-parser"
+
+# install prompt.sh
+echo "Installing prompt.sh..."
+[ -f "$HOME/lib/prompt.sh" ] && rm -rf "$HOME/lib/prompt.sh"
+ln -s "$SCRIPT_PATH/lib/prompt.sh" "$HOME/lib/prompt.sh"
+
+# Adding prompt to bashrc if not there
+if ! grep -q 'source "$HOME/lib/prompt.sh"' "$HOME/.bashrc"; then
+    echo "Installing prompt in .bashrc"
+    echo 'source "$HOME/lib/prompt.sh"' >> "$HOME/.bashrc"
+    source "$HOME/.profile"
+fi
 
