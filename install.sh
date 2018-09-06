@@ -7,6 +7,7 @@ fail() {
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
+# checking home variable
 if [[ -z ${HOME} ]]; then
     fail "The HOME variable has to be set!"
 fi
@@ -15,6 +16,11 @@ fi
 echo "Installing p4merge..."
 [ -f "$HOME/bin/p4merge" ] && rm -rf "$HOME/bin/p4merge"
 ln -s "$SCRIPT_PATH/dist/p4v/bin/p4merge" "$HOME/bin/p4merge"
+
+# install post-merge hook
+echo "Installing post-merge hook..."
+[ -f "$SCRIPT_PATH/.git/hooks/post-merge" ] && rm -rf "$SCRIPT_PATH/.git/hooks/post-merge"
+ln -s "../../post-merge" "$SCRIPT_PATH/.git/hooks/post-merge"
 
 # install gitconfig
 echo "Installing gitconfig..."
@@ -71,4 +77,6 @@ if ! grep -q 'source "$HOME/lib/prompt.sh"' "$HOME/.bashrc"; then
     echo 'source "$HOME/lib/prompt.sh"' >> "$HOME/.bashrc"
     source "$HOME/.profile"
 fi
+
+echo "Installation complete!"
 
