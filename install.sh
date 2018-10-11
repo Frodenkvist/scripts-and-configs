@@ -48,10 +48,10 @@ if [ ! -d "$HOME/bin" ]; then
 fi
 
 # add bin to path if not there
-if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$PROFILE"; then
+if ! grep -q 'export PATH="$PATH:$HOME/bin"' "$PROFILE"; then
     echo "Adding $HOME/bin to PATH"
-    echo 'export PATH="$HOME/bin:$PATH"' >> "$PROFILE"
-    source "$HOME/.profile"
+    echo 'export PATH="$PATH:$HOME/bin"' >> "$PROFILE"
+    source "$PROFILE"
 fi
 
 # create lib folder if not exists
@@ -59,6 +59,14 @@ if [ ! -d "$HOME/lib" ]; then
     echo "Creating lib directory"
     mkdir "$HOME/lib"
 fi
+
+# install scripts
+for file_path in $SCRIPT_PATH/bin/*; do
+    FILE=$(basename $file_path)
+    echo "Installing ${FILE}..."
+    [ -f "$HOME/bin/$FILE" ] && rm -rf "$HOME/bin/$FILE"
+    ln -s "$file_path" "$HOME/bin/$FILE"
+done
 
 # install colors.sh
 echo "Installing colors.sh..."
@@ -69,11 +77,6 @@ ln -s "$SCRIPT_PATH/lib/colors.sh" "$HOME/lib/colors.sh"
 echo "Installing gitstatus..."
 [ -f "$HOME/lib/gitstatus" ] && rm -rf "$HOME/lib/gitstatus"
 ln -s "$SCRIPT_PATH/lib/gitstatus" "$HOME/lib/gitstatus"
-
-# install git-parser
-echo "Installing git-parser..."
-[ -f "$HOME/bin/git-parser" ] && rm -rf "$HOME/bin/git-parser"
-ln -s "$SCRIPT_PATH/bin/git-parser" "$HOME/bin/git-parser"
 
 # install prompt.sh
 echo "Installing prompt.sh..."
