@@ -7,6 +7,15 @@ fail() {
 
 SCRIPT_PATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
+PROFILE=""
+if [ -f "$HOME/.profile" ]; then
+    PROFILE="$HOME/.profile"
+elif [ -f "$HOME/.bash_profile" ]; then
+    PROFILE="$HOME/.bash_profile"
+else
+    fail "Unable to find profile file!"
+fi
+
 # checking home variable
 if [[ -z ${HOME} ]]; then
     fail "The HOME variable has to be set!"
@@ -39,9 +48,9 @@ if [ ! -d "$HOME/bin" ]; then
 fi
 
 # add bin to path if not there
-if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$HOME/.profile"; then
+if ! grep -q 'export PATH="$HOME/bin:$PATH"' "$PROFILE"; then
     echo "Adding $HOME/bin to PATH"
-    echo 'export PATH="$HOME/bin:$PATH"' >> "$HOME/.profile"
+    echo 'export PATH="$HOME/bin:$PATH"' >> "$PROFILE"
     source "$HOME/.profile"
 fi
 
@@ -75,7 +84,7 @@ ln -s "$SCRIPT_PATH/lib/prompt.sh" "$HOME/lib/prompt.sh"
 if ! grep -q 'source "$HOME/lib/prompt.sh"' "$HOME/.bashrc"; then
     echo "Installing prompt in .bashrc"
     echo 'source "$HOME/lib/prompt.sh"' >> "$HOME/.bashrc"
-    source "$HOME/.profile"
+    source "$PROFILE"
 fi
 
 echo "Installation complete!"
