@@ -90,5 +90,14 @@ if ! grep -q 'source "$HOME/lib/prompt.sh"' "$HOME/.bashrc"; then
     source "$PROFILE"
 fi
 
+# Installing completion scripts
+for file_path in $SCRIPT_PATH/completions/*; do
+    FILE=$(basename $file_path)
+    echo "Installing ${FILE}..."
+    [ -f "/etc/bash_completion.d/$FILE" ] && sudo rm -rf "/etc/bash_completion.d/$FILE"
+    sudo ln -s "$file_path" "/etc/bash_completion.d/$FILE"
+    source $file_path
+done
+
 echo "Installation complete!"
 
