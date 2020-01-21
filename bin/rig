@@ -1,0 +1,28 @@
+#!/bin/bash
+
+getValue() {
+  local NAME=$1
+  echo "$RES" | awk "f{print;f=0} /$1/{f=1}" | sed 's/^[ \t]*//;s/[ \t]*$//' | sed 's,<td>,,g' | sed 's,</td>,,g'
+}
+
+RES=$(curl -s https://fejk.se)
+
+PERSONNUMMER=$(getValue "Personnummer")
+NAMN=$(getValue "Namn")
+GATA=$(getValue "Gata")
+POSTORT=$(getValue "Postort")
+TELEFON=$(getValue "Telefon")
+MAIL=$(getValue "Mail" | sed 's,<a.*">,,g' | sed ':a;N;$!ba;s/\n/ /g' | sed 's,</a.*,,g')
+ALDER=$(getValue "Ålder")
+FODELSEDATUM=$(getValue "Födelsedatum")
+
+echo ""
+echo "Namn:          $NAMN"
+echo "Personnummer:  ${FODELSEDATUM:0:2}$PERSONNUMMER"
+echo "Gata:          $GATA"
+echo "Postort:       $POSTORT"
+echo "Mail:          $MAIL"
+echo "Ålder:         $ALDER"
+echo "Födelsedatum:  $FODELSEDATUM"
+echo "Telefonnummer: $TELEFON"
+echo ""
