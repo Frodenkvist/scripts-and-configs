@@ -83,6 +83,26 @@ echo "Installing prompt.sh..."
 [ -f "$HOME/lib/prompt.sh" ] && rm -rf "$HOME/lib/prompt.sh"
 ln -s "$SCRIPT_PATH/lib/prompt.sh" "$HOME/lib/prompt.sh"
 
+# install lastnames.txt
+echo "Installing lastnames.txt..."
+[ -f "$HOME/lib/lastnames.txt" ] && rm -rf "$HOME/lib/lastnames.txt"
+ln -s "$SCRIPT_PATH/lib/lastnames.txt" "$HOME/lib/lastnames.txt"
+
+# install girl-names.txt
+echo "Installing girl-names.txt..."
+[ -f "$HOME/lib/girl-names.txt" ] && rm -rf "$HOME/lib/girl-names.txt"
+ln -s "$SCRIPT_PATH/lib/girl-names.txt" "$HOME/lib/girl-names.txt"
+
+# install lastnames.txt
+echo "Installing boy-names.txt..."
+[ -f "$HOME/lib/boy-names.txt" ] && rm -rf "$HOME/lib/boy-names.txt"
+ln -s "$SCRIPT_PATH/lib/boy-names.txt" "$HOME/lib/boy-names.txt"
+
+# install lastnames.txt
+echo "Installing postorter.txt..."
+[ -f "$HOME/lib/postorter.txt" ] && rm -rf "$HOME/lib/postorter.txt"
+ln -s "$SCRIPT_PATH/lib/postorter.txt" "$HOME/lib/postorter.txt"
+
 # Adding prompt to bashrc if not there
 if ! grep -q 'source "$HOME/lib/prompt.sh"' "$HOME/.bashrc"; then
     echo "Installing prompt in .bashrc"

@@ -1,28 +1,203 @@
-#!/bin/bash
+#!/bin/python3
 
-getValue() {
-  local NAME=$1
-  echo "$RES" | awk "f{print;f=0} /$1/{f=1}" | sed 's/^[ \t]*//;s/[ \t]*$//' | sed 's,<td>,,g' | sed 's,</td>,,g'
-}
+import random
+import datetime
+import re
+import requests
+import argparse
+import sys
+import os
 
-RES=$(curl -s https://fejk.se)
+API_KEY = "1b9f8bf5e635c07219d902b47630aa63ede7dd48"
 
-PERSONNUMMER=$(getValue "Personnummer")
-NAMN=$(getValue "Namn")
-GATA=$(getValue "Gata")
-POSTORT=$(getValue "Postort")
-TELEFON=$(getValue "Telefon")
-MAIL=$(getValue "Mail" | sed 's,<a.*">,,g' | sed ':a;N;$!ba;s/\n/ /g' | sed 's,</a.*,,g')
-ALDER=$(getValue "Ålder")
-FODELSEDATUM=$(getValue "Födelsedatum")
+with open(os.environ['HOME'] + "/lib/boy-names.txt") as f:
+    BOY_NAMES = f.readlines()
 
-echo ""
-echo "Namn:          $NAMN"
-echo "Personnummer:  ${FODELSEDATUM:0:2}$PERSONNUMMER"
-echo "Gata:          $GATA"
-echo "Postort:       $POSTORT"
-echo "Mail:          $MAIL"
-echo "Ålder:         $ALDER"
-echo "Födelsedatum:  $FODELSEDATUM"
-echo "Telefonnummer: $TELEFON"
-echo ""
+BOY_NAMES = [x.strip() for x in BOY_NAMES]
+
+with open(os.environ['HOME'] + "/lib/girl-names.txt") as f:
+    GIRL_NAMES = f.readlines()
+
+GIRL_NAMES = [x.strip() for x in GIRL_NAMES]
+
+with open(os.environ['HOME'] + "/lib/lastnames.txt") as f:
+    LASTNAMES = f.readlines()
+
+LASTNAMES = [x.strip() for x in LASTNAMES]
+
+with open(os.environ['HOME'] + "/lib/postorter.txt") as f:
+    POSTORTER = f.readlines()
+
+POSTORTER = [x.strip() for x in POSTORTER]
+
+MALE_NUMBERS = ["1", "3", "5", "7", "9"]
+FEMALE_NUMBERS = ["0", "2", "4", "6", "8"]
+EMAILS = ["dodgit.com", "spamherelots.com",
+          "mailinater.com", "mailmetrash.com"]
+
+PHONE_NUMBER_PREFIXES = ["070", "072", "073", "076", "079"]
+
+
+def swedish_pnr_check_digit(s):
+    digits = [int(d) for d in re.sub(r'\D', '', s)][-9:]
+    if len(digits) != 9:
+        return None
+    even_digitsum = sum(x if x < 5 else x - 9 for x in digits[::2])
+    check_digit = sum(digits, even_digitsum) % 10
+    return 10 - check_digit if check_digit else 0
+
+
+def daysInMonth(month):
+    switcher = {
+        1: 31,
+        2: 28,
+        3: 31,
+        4: 30,
+        5: 31,
+        6: 30,
+        7: 31,
+        8: 31,
+        9: 30,
+        10: 31,
+        11: 30,
+        12: 31
+    }
+    return switcher.get(month, -1)
+
+
+def intToString(value):
+    return str(value) if value > 9 else "0" + str(value)
+
+
+def capitalize(value):
+    firstLetter = value[:1]
+    return firstLetter.upper() + value[1:len(value)].lower()
+
+
+def capitalizeAll(value):
+    name = " "
+    capList = []
+    for x in value.split():
+        capList.append(capitalize(x))
+
+    return name.join(capList)
+
+
+def escapeString(value):
+    value = re.sub(r"[åä]", "a", value)
+    value = re.sub(r"[ö]", "o", value)
+    value = re.sub(r"[ÅÄ]", "A", value)
+    value = re.sub(r"[Ö]", "O", value)
+    return value
+
+
+def generatePhoneNumber():
+    phoneNumber = PHONE_NUMBER_PREFIXES[random.randrange(
+        len(PHONE_NUMBER_PREFIXES))] + "-"
+
+    for i in range(7):
+        phoneNumber += str(random.randrange(10))
+
+    return phoneNumber
+
+
+def generateFakePerson():
+    if male:
+        fullname = BOY_NAMES[random.randrange(
+            len(BOY_NAMES))]
+    else:
+        fullname = GIRL_NAMES[random.randrange(
+            len(GIRL_NAMES))]
+
+    fullname += " " + LASTNAMES[random.randrange(len(LASTNAMES))]
+
+    now = datetime.datetime.now()
+
+    if exactAge != -1:
+        age = exactAge
+    else:
+        age = random.randrange(minAge, maxAge + 1)
+
+    month = random.randrange(12) + 1
+    day = random.randrange(daysInMonth(month)) + 1
+
+    hasHadBday = month < now.month or day <= now.day
+
+    year = now.year - age - (0 if hasHadBday else 1)
+
+    birthDate = datetime.datetime(year, month, day)
+
+    personnummer = str(birthDate.year) + intToString(month) + intToString(day) + \
+        "-" + str(random.randrange(10)) + str(random.randrange(10)) + \
+        (MALE_NUMBERS[random.randrange(
+            5)] if male else FEMALE_NUMBERS[random.randrange(5)])
+
+    personnummer += str(swedish_pnr_check_digit(personnummer))
+
+    postort = POSTORTER[random.randrange(len(POSTORTER))]
+
+    resp = requests.get(
+        "https://papapi.se/json/?c={}&token={}".format(postort, API_KEY))
+    json = resp.json()
+
+    adress = json['result'][random.randrange(len(json['result']))]
+
+    street = capitalizeAll(adress["street"])
+
+    if "number" in adress:
+        streetNumbers = adress["number"].split("-")
+
+        if streetNumbers[0] == streetNumbers[1]:
+            street += " " + streetNumbers[0]
+        else:
+            street += " " + str(random.randrange(
+                int(streetNumbers[0]), int(streetNumbers[1])))
+
+    postort = adress['zipcode'] + " " + postort
+    email = fullname.split()[0].lower(
+    ) + "." + fullname.split()[1].lower() + "@" + EMAILS[random.randrange(len(EMAILS))]
+    email = escapeString(email)
+
+    phoneNumber = generatePhoneNumber()
+
+    print("")
+    print("Namn:          {}".format(fullname))
+    print("Personnummer:  {}".format(personnummer))
+    print("Gata:          {}".format(street))
+    print("Postort:       {}".format(postort))
+    print("Mail:          {}".format(email))
+    print("Ålder:         {} år".format(age))
+    print("Födelsedatum:  {}".format(birthDate.strftime("%Y-%m-%d")))
+    print("Telefonnummer: {}".format(phoneNumber))
+    print("")
+
+
+male = random.randrange(2) == 0
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "-a", "--age", dest="age", help="sets the the age of the generated id", type=int, default=-1)
+parser.add_argument(
+    "-n", "--number", dest="number", help="sets the number of generated ids", type=int, default=1)
+parser.add_argument(
+    "-m", dest="male", help="sets the generated id to be male", action="store_true")
+parser.add_argument(
+    "-f", dest="female", help="sets the generated id to be female", action="store_true")
+parser.add_argument(
+    "--max-age", dest="maxAge", help="sets the maximum age of the generated id", type=int, default=99)
+parser.add_argument(
+    "--min-age", dest="minAge", help="sets the minimum age of the generated id", type=int, default=0)
+args = parser.parse_args()
+
+exactAge = args.age
+number = args.number
+maxAge = args.maxAge
+minAge = args.minAge
+
+if args.male is not None:
+    male = True
+elif args.female is not None:
+    male = False
+
+for i in range(number):
+    generateFakePerson()
