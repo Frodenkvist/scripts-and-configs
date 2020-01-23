@@ -172,8 +172,6 @@ def generateFakePerson():
     print("")
 
 
-male = random.randrange(2) == 0
-
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "-a", "--age", dest="age", help="sets the the age of the generated id", type=int, default=-1)
@@ -194,10 +192,12 @@ number = args.number
 maxAge = args.maxAge
 minAge = args.minAge
 
-if args.male is not None:
-    male = True
-elif args.female is not None:
-    male = False
-
 for i in range(number):
+    male = random.randrange(2) == 0
+
+    if args.male:
+        male = True
+    elif args.female:
+        male = False
+
     generateFakePerson()
