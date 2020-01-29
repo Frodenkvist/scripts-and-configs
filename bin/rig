@@ -127,6 +127,9 @@ def generateFakePerson():
 
     birthDate = datetime.datetime(year, month, day)
 
+    if(samordning):
+        day = day + 60
+
     personnummer = str(birthDate.year) + intToString(month) + intToString(day) + \
         "-" + str(random.randrange(10)) + str(random.randrange(10)) + \
         (MALE_NUMBERS[random.randrange(
@@ -185,12 +188,15 @@ parser.add_argument(
     "--max-age", dest="maxAge", help="sets the maximum age of the generated id", type=int, default=99)
 parser.add_argument(
     "--min-age", dest="minAge", help="sets the minimum age of the generated id", type=int, default=0)
+parser.add_argument(
+    "-s", "--samordning", dest="samordning", help="sets the personnummer to a samordningsnummer", action="store_true")
 args = parser.parse_args()
 
 exactAge = args.age
 number = args.number
 maxAge = args.maxAge
 minAge = args.minAge
+samordning = args.samordning
 
 for i in range(number):
     male = random.randrange(2) == 0
