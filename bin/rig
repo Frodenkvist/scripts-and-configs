@@ -118,12 +118,25 @@ def generateFakePerson():
     else:
         age = random.randrange(minAge, maxAge + 1)
 
-    month = random.randrange(12) + 1
-    day = random.randrange(daysInMonth(month)) + 1
+    if exactMonth != -1:
+        month = exactMonth
+    else:
+        month = random.randrange(12) + 1
 
-    hasHadBday = month < now.month or day <= now.day
+    if exactDay != -1:
+        day = exactDay
+    else:
+        day = random.randrange(daysInMonth(month)) + 1
 
-    year = now.year - age - (0 if hasHadBday else 1)
+    hasHadBday = month < now.month or (month == now.month and day <= now.day)
+
+    if exactYear != -1:
+        year = exactYear
+    else:
+        year = now.year - age - (0 if hasHadBday else 1)
+
+    if exactYear != -1 or exactMonth != -1 or exactDay != -1:
+        age = now.year - year - (0 if hasHadBday else 1)
 
     birthDate = datetime.datetime(year, month, day)
 
@@ -177,7 +190,7 @@ def generateFakePerson():
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
-    "-a", "--age", dest="age", help="sets the the age of the generated id", type=int, default=-1)
+    "-a", "--age", dest="age", help="sets the age of the generated id", type=int, default=-1)
 parser.add_argument(
     "-n", "--number", dest="number", help="sets the number of generated ids", type=int, default=1)
 parser.add_argument(
@@ -190,6 +203,12 @@ parser.add_argument(
     "--min-age", dest="minAge", help="sets the minimum age of the generated id", type=int, default=0)
 parser.add_argument(
     "-s", "--samordning", dest="samordning", help="sets the personnummer to a samordningsnummer", action="store_true")
+parser.add_argument(
+    "--year", dest="year", help="sets the year the person is born", type=int, default=-1)
+parser.add_argument(
+    "--month", dest="month", help="sets the month the person is born", type=int, default=-1)
+parser.add_argument(
+    "--day", dest="day", help="sets the day the person is born", type=int, default=-1)
 args = parser.parse_args()
 
 exactAge = args.age
@@ -197,6 +216,9 @@ number = args.number
 maxAge = args.maxAge
 minAge = args.minAge
 samordning = args.samordning
+exactYear = args.year
+exactMonth = args.month
+exactDay = args.day
 
 for i in range(number):
     male = random.randrange(2) == 0
