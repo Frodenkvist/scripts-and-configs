@@ -159,6 +159,8 @@ def generateFakePerson():
     adress = json['result'][random.randrange(len(json['result']))]
 
     street = capitalizeAll(adress["street"])
+    lanKod = adress["code"][:2]
+    kommunKod = adress["code"][2:4]
 
     if "number" in adress:
         streetNumbers = adress["number"].split("-")
@@ -185,6 +187,8 @@ def generateFakePerson():
     print("Ålder:         {} år".format(age))
     print("Födelsedatum:  {}".format(birthDate.strftime("%Y-%m-%d")))
     print("Telefonnummer: {}".format(phoneNumber))
+    print("Län kod:       {}".format(lanKod))
+    print("Komun kod:     {}".format(kommunKod))
     print("")
 
 
