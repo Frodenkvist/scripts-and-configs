@@ -188,7 +188,7 @@ def generateFakePerson():
     print("Födelsedatum:  {}".format(birthDate.strftime("%Y-%m-%d")))
     print("Telefonnummer: {}".format(phoneNumber))
     print("Län kod:       {}".format(lanKod))
-    print("Komun kod:     {}".format(kommunKod))
+    print("Kommun kod:    {}".format(kommunKod))
     print("")
 
 
