@@ -1,0 +1,4 @@
+#!/bin/sh
+
+curl -s http://vadarklockanomenkvart.se/mat/ | grep "<p>" | sed 's,</\?p>,,g'
+
